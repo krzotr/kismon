@@ -192,6 +192,12 @@ class ConfigWindow:
 			perf_marker_positions.clicked()
 		perf_marker_positions.connect("clicked", self.on_update_marker_positions)
 		perf_vbox.add(perf_marker_positions)
+
+		perf_heading = Gtk.CheckButton.new_with_label("Heading")
+		if self.config["map"]["heading"]:
+			perf_heading.clicked()
+		perf_heading.connect("clicked", self.on_update_heading)
+		perf_vbox.add(perf_heading)
 		
 	def on_destroy(self, window):
 		self.gtkwin = None
@@ -213,4 +219,7 @@ class ConfigWindow:
 		
 	def on_update_marker_positions(self, widget):
 		self.config["map"]["update_marker_positions"] = widget.get_active()
-		
+
+	def on_update_heading(self, widget):
+		self.config["map"]["heading"] = widget.get_active()
+

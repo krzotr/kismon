@@ -190,6 +190,7 @@ class Core:
 		#gps
 		gps = None
 		fix = None
+		heading = None
 		gps_queue = thread.get_queue("gps")
 		while True:
 			try:
@@ -197,6 +198,7 @@ class Core:
 				if gps is None:
 					gps = data
 				if data["fix"] > 1:
+					heading = float(data["heading"])
 					fix = (data["lat"], data["lon"])
 					break
 			except IndexError:
@@ -206,7 +208,7 @@ class Core:
 			if fix is not None and self.map is not None:
 				server = "server%s" % (server_id + 1)
 				if server_id == 0:
-					self.map.set_position(fix[0], fix[1])
+					self.map.set_position(fix[0], fix[1], heading)
 				else:
 					self.map.add_marker(server, server, fix[0], fix[1])
 				self.map.add_track(fix[0], fix[1], server_id)

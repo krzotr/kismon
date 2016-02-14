@@ -186,11 +186,15 @@ class Map:
 			return True
 		return False
 		
-	def set_position(self, lat, lon, force=False):
+	def set_position(self, lat, lon, heading=OsmGpsMap.MAP_INVALID):
 		if self.is_position_invalid(lat, lon):
 			return
+
+		if not self.config["heading"]:
+			heading = OsmGpsMap.MAP_INVALID
+
 		self.osm.gps_clear()
-		self.osm.gps_add(lat, lon, heading=OsmGpsMap.MAP_INVALID);
+		self.osm.gps_add(lat, lon, heading=heading);
 		
 		self.config["last_position"] = "%s/%s" % (lat, lon)
 		
