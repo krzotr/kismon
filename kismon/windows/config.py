@@ -180,12 +180,94 @@ class ConfigWindow:
 		apply_button = Gtk.Button.new_with_mnemonic('_Apply')
 		apply_button.connect("clicked", self.on_map_source, "custom")
 		hbox.pack_start(apply_button, False, False, 5)
+
+
+		# Bounding - I'll optimize this piece of code
+		bounding_frame = Gtk.Frame()
+		bounding_frame.set_label("Bounding")
+
+		bounding_vbox = Gtk.VBox()
+		bounding_frame.add(bounding_vbox)
+
+		# Enable button
+		bounding_enable = Gtk.CheckButton.new_with_label("Enable")
+		if self.config["map"]["bounding"]:
+			bounding_enable.clicked()
+		bounding_enable.connect("clicked", self.on_map_bounding_change, "enable")
+		bounding_vbox.add(bounding_enable)
+
+		bounding_hbox = Gtk.HBox()
+		bounding_vbox.add(bounding_hbox)
+
+		# Lat
+		slat, nlat = self.config["map"]["bounding_lat"].split("/")
+
+		bounding_hbox.pack_start(Gtk.Label(label="South Latitude:"), False, False, 5)
+		bounding_slat = Gtk.SpinButton(digits=3)
+		bounding_slat.set_max_length(6)
+		bounding_slat.set_numeric(True)
+		bounding_slat.set_increments(0.01, 0.01)
+		bounding_slat.set_range(-90.0, 90.0)
+		bounding_slat.set_value(float(slat))
+		bounding_slat.connect("output", self.on_map_bounding_change, "slat")
+		bounding_hbox.pack_start(bounding_slat, False, False, 5)
+
+		bounding_hbox.pack_start(Gtk.Label(label="North Latitude:"), False, False, 5)
+		bounding_nlat = Gtk.SpinButton(digits=3)
+		bounding_nlat.set_max_length(6)
+		bounding_nlat.set_numeric(True)
+		bounding_nlat.set_increments(0.01, 0.01)
+		bounding_nlat.set_range(-90.0, 90.0)
+		bounding_nlat.set_value(float(nlat))
+		bounding_nlat.connect("output", self.on_map_bounding_change, "nlat")
+		bounding_hbox.pack_start(bounding_nlat, False, False, 5)
+
+		bounding_hbox2 = Gtk.HBox()
+
+		# Lon
+		wlon, elon = self.config["map"]["bounding_lon"].split("/")
+
+		bounding_hbox2.pack_start(Gtk.Label(label="West Lontitude:"), False, False, 5)
+		bounding_wlon = Gtk.SpinButton(digits=3)
+		bounding_wlon.set_max_length(6)
+		bounding_wlon.set_numeric(True)
+		bounding_wlon.set_increments(0.01, 0.01)
+		bounding_wlon.set_range(-180.0, 180.0)
+		bounding_wlon.set_value(float(wlon))
+		bounding_wlon.connect("output", self.on_map_bounding_change, "wlon")
+		bounding_hbox2.pack_start(bounding_wlon, False, False, 5)
+
+		bounding_hbox2.pack_start(Gtk.Label(label="East Lontitude:"), False, False, 5)
+		bounding_elon = Gtk.SpinButton(digits=3)
+		bounding_elon.set_max_length(6)
+		bounding_elon.set_numeric(True)
+		bounding_elon.set_increments(0.01, 0.01)
+		bounding_elon.set_range(-180.0, 180.0)
+		bounding_elon.set_value(float(elon))
+		bounding_elon.connect("output", self.on_map_bounding_change, "elon")
+		bounding_hbox2.pack_start(bounding_elon, False, False, 5)
+
+		bounding_vbox.add(bounding_hbox2)
+
+		bounding_hbox3 = Gtk.HBox()
+
+		bounding_apply = Gtk.Button.new_with_mnemonic('_Apply')
+		bounding_apply.connect("clicked", self.on_map_bounding, False)
+		bounding_hbox3.add(bounding_apply)
+
+		bounding_apply2 = Gtk.Button.new_with_mnemonic('Apply and reload filters')
+		bounding_apply2.connect("clicked", self.on_map_bounding, True)
+		bounding_hbox3.add(bounding_apply2)
+
+		bounding_vbox.add(bounding_hbox3)
+
+		map_page.attach(bounding_frame, 0, 1, 4, 5, yoptions=Gtk.AttachOptions.SHRINK)
 		
 		perf_frame = Gtk.Frame()
 		perf_frame.set_label("Performance")
 		perf_vbox = Gtk.VBox()
 		perf_frame.add(perf_vbox)
-		map_page.attach(perf_frame, 0, 1, 4, 5, yoptions=Gtk.AttachOptions.SHRINK)
+		map_page.attach(perf_frame, 0, 1, 5, 6, yoptions=Gtk.AttachOptions.SHRINK)
 		
 		perf_marker_positions = Gtk.CheckButton.new_with_label("Update marker positions")
 		if self.config["map"]["update_marker_positions"] is True:
@@ -195,7 +277,33 @@ class ConfigWindow:
 		
 	def on_destroy(self, window):
 		self.gtkwin = None
-		
+
+	def on_map_bounding_change(self, widget, name):
+		slat, nlat = self.config["map"]["bounding_lat"].split("/")
+		wlon, elon = self.config["map"]["bounding_lon"].split("/")
+
+		cfg = {
+			"slat": float(slat),
+			"nlat": float(nlat),
+			"wlon": float(wlon),
+			"elon": float(elon)
+		}
+
+		if name == "enable":
+			self.config["map"]["bounding"] = widget.get_active()
+		else:
+			cfg[name] = float(widget.get_value())
+
+		self.config["map"]["bounding_lat"] = "%.3f/%.3f" % (cfg["slat"], cfg["nlat"])
+		self.config["map"]["bounding_lon"] = "%.3f/%.3f" % (cfg["wlon"], cfg["elon"])
+
+	def on_map_bounding(self, widget, filters=False):
+		if filters:
+			self.main_window.networks.apply_filters()
+			self.main_window.networks_queue_progress()
+
+		self.map.set_bounding()
+
 	def on_map_source(self, widget, source):
 		if (type(widget) == Gtk.RadioButton and widget.get_active()) or type(widget) == Gtk.Button:
 			self.map.change_source(source)

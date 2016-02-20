@@ -54,6 +54,9 @@ class Config:
 				"custom_source_url": "http://localhost:8080/#Z/#X/#Y.png",
 				"custom_source_min": 12,
 				"custom_source_max": 17,
+				"bounding": False,
+				"bounding_lat": "0/0",
+				"bounding_lon": "0/0",
 				},
 			"networks": {
 				"autosave": 5,
@@ -110,6 +113,10 @@ class Config:
 					elif valtype == list:
 						value = [v.strip() for v in value.split(",")]
 					self.config[section][key] = value
+
+		# Disable bounding if user entered invalid coords
+		if not self.is_valid_bounding():
+			self.config["map"]["bounding"] = False
 	
 	def write(self):
 		#print "writing config %s" % self.config_file
@@ -128,7 +135,41 @@ class Config:
 		configfile = open(self.config_file, 'w')
 		config.write(configfile)
 		configfile.close()
-		
+
+	def get_bounding(self):
+		slat, nlat = self.config["map"]["bounding_lat"].split("/")
+		wlon, elon = self.config["map"]["bounding_lon"].split("/")
+
+		return {
+			"slat": float(slat),
+			"nlat": float(nlat),
+			"wlon": float(wlon),
+			"elon": float(elon)
+		}
+
+	def is_valid_bounding(self):
+		b = self.get_bounding()
+
+		if b["nlat"] > 90 or b["slat"] < -90:
+			return False
+
+		if b["elon"] > 180 or b["wlon"] < -180:
+			return False
+
+		if b["nlat"] < b["slat"]:
+			return False
+
+		if b["elon"] < b["wlon"]:
+			return False
+
+		if b["elon"] - b["wlon"] < 0.01:
+			return False
+
+		if b["nlat"] - b["slat"] < 0.01:
+			return False
+
+		return True
+
 	def show(self):
 		txt="\n"
 		for section in self.config:

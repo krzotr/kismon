@@ -46,6 +46,7 @@ class Map:
 		self.networks_label_count = 0
 		self.coordinates = {}
 		self.tracks = {}
+		self.bounding = {}
 		
 		self.init_osm()
 		
@@ -89,6 +90,8 @@ class Map:
 			self.add_marker(marker.key, marker.color, marker.lat, marker.lon)
 		
 		self.widget = self.osm
+
+		self.set_bounding()
 		
 	def reinit_osm(self):
 		# Create a new map widget with the config settings
@@ -101,7 +104,34 @@ class Map:
 	def apply_config(self):
 		pass
 		
-	def create_dot(self, name, color=None, size=16, number=None):
+	def set_bounding(self):
+		if self.bounding:
+			self.osm.track_remove(self.bounding)
+			self.bounding = {}
+
+		if not self.config["bounding"]:
+			return
+
+		slat, nlat = self.config["bounding_lat"].split("/")
+		wlon, elon = self.config["bounding_lon"].split("/")
+
+		self.bounding = track = OsmGpsMap.MapTrack()
+		self.bounding.set_property("line-width", 2)
+
+		points = (
+			OsmGpsMap.MapPoint.new_degrees(float(nlat), float(wlon)),
+			OsmGpsMap.MapPoint.new_degrees(float(nlat), float(elon)),
+			OsmGpsMap.MapPoint.new_degrees(float(slat), float(elon)),
+			OsmGpsMap.MapPoint.new_degrees(float(slat), float(wlon)),
+			OsmGpsMap.MapPoint.new_degrees(float(nlat), float(wlon))
+		)
+
+		for p in points:
+			self.bounding.add_point(p)
+
+		self.osm.track_add(self.bounding)
+
+	def create_dot(self, name, color=None, size=12, number=None):
 		if color is None:
 			color = name
 		drawable = cairo.ImageSurface(cairo.FORMAT_RGB24, size, size)

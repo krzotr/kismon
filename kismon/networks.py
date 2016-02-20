@@ -152,6 +152,15 @@ class Networks:
 	def check_filter(self, mac, network):
 		if self.config["filter_type"][network["type"]] == False:
 			return False
+
+		if self.config["map"]["bounding"]:
+			slat, nlat = self.config["map"]["bounding_lat"].split("/")
+			wlon, elon = self.config["map"]["bounding_lon"].split("/")
+
+			if not (network["lon"] >= float(wlon) and network["lon"] <= float(elon) \
+				and network["lat"] >= float(slat) and network["lat"] <= float(nlat)
+			):
+				return False
 		
 		crypts = decode_cryptset(network["cryptset"])
 		if crypts == ["none"]:
