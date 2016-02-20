@@ -132,6 +132,7 @@ class TestEvent:
 	def __init__(self):
 		from gi.repository import Gdk
 		self.new_window_state = Gdk.WindowState.MAXIMIZED
+		self.keyval = 0
 
 def gui_file_import_window():
 	test_widget = TestWidget()
@@ -335,11 +336,11 @@ class TestKismon(unittest.TestCase):
 		main_window.network_list.on_copy_network(None)
 		main_window.network_list.on_comment_editing_done(test_widget)
 		main_window.network_list.remove_network('00:12:2A:03:B9:12')
-		main_window.update_info_table(0, {"networks":100, "packets":200} )
-		main_window.update_gps_table(0, {"fix": 3, "lat": 52.0, "lon": 13.0})
+		main_window.server_tabs[0].update_info_table({"networks":100, "packets":200} )
+		main_window.server_tabs[0].update_gps_table({"fix": 3, "lat": 52.0, "lon": 13.0})
 		sources = {"1": {"uuid": "1", "username": "test", "type": "bla",
 			"channel": 11, "packets": 100}}
-		main_window.update_sources_table(0, sources)
+		main_window.server_tabs[0].update_sources_table(sources)
 		main_window.on_configure_event(None, None)
 		main_window.on_config_window(None)
 		main_window.on_config_window(None)
@@ -397,6 +398,14 @@ class TestKismon(unittest.TestCase):
 		test_config = Config(None).default_config["map"]
 		test_map = Map(test_config)
 		map_window = MapWindow(test_map)
+		test_event = TestEvent()
+		test_event.keyval = 65480 # F11
+		map_window.on_key_release(None, test_event)
+		map_window.on_key_release(None, test_event)
+		test_event.keyval = 105 # i
+		map_window.on_key_release(None, test_event)
+		test_event.keyval = 111 # o
+		map_window.on_key_release(None, test_event)
 		map_window.hide()
 		map_window.on_destroy(None)
 	
@@ -439,6 +448,29 @@ class TestKismon(unittest.TestCase):
 		test_widget.active = False
 		signal_window.on_graph_type(test_widget, "signal")
 		signal_window.on_graph_type(test_widget, "packets")
+	
+	@unittest.skipUnless(gi_available, "gi module not available")
+	def test_file_import_window(self):
+		try:
+			from .gui import FileImportWindow
+		except SystemError:
+			from gui import FileImportWindow
+		
+		test_networks = networks()
+		file_import_window = FileImportWindow(test_networks, print)
+		file_import_window.create_file_chooser('file')
+		file_import_window.create_file_chooser('dir')
+		file_import_window.add_file('foo.bar')
+		file_import_window.on_remove_file(None, 'foo.bar')
+		file_import_window.add_file('foo.bar')
+		file_import_window.add_file('kismet.netxml')
+		file_import_window.add_file('kismet.csv')
+		file_import_window.add_file('kismon.json')
+		file_import_window.on_start(None)
+		file_import_window.parse_file()
+		file_import_window.parse_file()
+		file_import_window.parse_file()
+		file_import_window.on_close(None)
 	
 	@unittest.skipUnless(gi_available, "gi module not available")
 	def test_map(self):

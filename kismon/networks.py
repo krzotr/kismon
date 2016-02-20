@@ -38,10 +38,11 @@ import re
 
 try:
 	from .client import *
-	from .gui import show_timestamp
+	import kismon.utils as utils
 except SystemError:
 	from client import *
-	from gui import show_timestamp
+	import utils
+
 
 class Networks:
 	def __init__(self, config):
@@ -580,7 +581,7 @@ GPS: %s,%s]]></description></Placemark>"""
 			folders[crypt].append(kml_placemark %(
 				crypt, ssid, network["lon"],network["lat"], ssid, mac,
 				network["manuf"], network["type"], network["channel"],
-				colors[crypt], ",".join(crypts).upper(), show_timestamp(network["lasttime"]),
+				colors[crypt], ",".join(crypts).upper(), utils.format_timestamp(network["lasttime"]),
 				network["lon"], network["lat"],
 			))
 			count[crypt] += 1
@@ -597,7 +598,7 @@ GPS: %s,%s]]></description></Placemark>"""
 			gps = "%s;%s" % (network["lat"], network["lon"])
 			f.write('%s;"%s";%s;%s;%s;%s;\n' % (
 				gps.replace(".",","), network["ssid"].replace(";"," ").replace('"'," "),
-				mac, print_cryptset(network["cryptset"]), network["channel"], show_timestamp(network["lasttime"])
+				mac, print_cryptset(network["cryptset"]), network["channel"], utils.format_timestamp(network["lasttime"])
 				))
 		f.close()
 		
