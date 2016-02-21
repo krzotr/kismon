@@ -67,7 +67,11 @@ class Networks:
 	def get_network(self, mac):
 		return self.networks[mac]
 		
-	def save(self, filename, notify=None):
+	def save(self, filename, notify=None, force=False):
+		if self.queue_running and not force:
+			print("Cannot save networks - queue is running")
+			return True
+
 		msg = "saving %s networks to %s" % (len(self.networks), filename)
 		print(msg)
 		if notify is not None:
@@ -114,7 +118,7 @@ class Networks:
 				f.write('    }, \n')
 			f.write('    "ssid": %s, \n' % enc.encode(network["ssid"]))
 			f.write('    "type": "%s",\n' % network["type"])
-			f.write('    "comment": "%s"\n' % network["comment"])
+			f.write('    "comment": %s\n' % enc.encode(network["comment"]))
 			if mac != macs[-1]:
 				f.write('  }, \n')
 			else:
@@ -136,6 +140,9 @@ class Networks:
 		
 	def load(self, filename):
 		f = open(filename)
+
+		print("Loading networks.json. Please wait.")
+
 		self.networks = json.load(f)
 		for network in self.networks:
 			if 'comment' not in self.networks[network]:
@@ -143,7 +150,9 @@ class Networks:
 			if 'servers' not in self.networks[network]:
 				self.networks[network]['servers'] = []
 		f.close()
-		
+
+		print("Total networks %d" % (len(self.networks)))
+
 	def apply_filters(self):
 		self.stop_queue()
 		self.apply_filters_on_networks()
@@ -228,7 +237,7 @@ class Networks:
 				
 				counter += 1
 				if time.time()-start_time > 0.9:
-					print("%s networks added in %ssec, %s networks left" % (counter, round(time.time()-start_time,3), len(self.notify_add_queue)))
+					print("%s networks added in %.1fsec, %s networks left" % (counter, round(time.time()-start_time,3), len(self.notify_add_queue)))
 					yield True
 					start_time = time.time()
 					counter = 0
@@ -332,7 +341,7 @@ class Networks:
 		
 		if mac not in self.networks:
 			if 'comment' not in data:
-				data['comment'] = data
+				data['comment'] = ""
 			if 'servers' not in data:
 				data['servers'] = []
 			self.networks[mac] = data
