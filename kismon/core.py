@@ -65,14 +65,6 @@ class Core:
 		self.config_handler.read()
 		self.config = self.config_handler.config
 		
-		self.marker_text = """Encryption: %s
-MAC: %s
-Manuf: %s
-Type: %s
-Channel: %s
-First seen: %s
-Last seen: %s"""
-		
 		self.sources = {}
 		self.crypt_cache = {}
 		self.networks = Networks(self.config)
@@ -297,7 +289,7 @@ Last seen: %s"""
 		while None in self.config['kismet']['servers']:
 			self.config['kismet']['servers'].remove(None)
 		self.config_handler.write()
-		self.networks.save(self.networks_file)
+		self.networks.save(self.networks_file, force=True)
 		
 	def add_network_to_map(self, mac):
 		network = self.networks.get_network(mac)
@@ -316,22 +308,6 @@ Last seen: %s"""
 			color = "yellow"
 		else:
 			color = "green"
-		
-		ssid = network["ssid"]
-		if ssid == "":
-			ssid = "<no ssid>"
-		evils = (("&", "&amp;"),("<", "&lt;"),(">", "&gt;"))
-		for evil, good in evils:
-			ssid = ssid.replace(evil, good)
-		
-		time_format = "%d.%m.%Y %H:%M:%S"
-		
-		text = self.marker_text % (crypt, mac, network["manuf"],
-			network["type"], network["channel"],
-			time.strftime(time_format, time.localtime(network["firsttime"])),
-			time.strftime(time_format, time.localtime(network["lasttime"]))
-			)
-		text = text.replace("&", "&amp;")
 		
 		self.map.add_marker(mac, color, network["lat"], network["lon"])
 
