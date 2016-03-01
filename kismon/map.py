@@ -115,7 +115,7 @@ class Map:
 		slat, nlat = self.config["bounding_lat"].split("/")
 		wlon, elon = self.config["bounding_lon"].split("/")
 
-		self.bounding = track = OsmGpsMap.MapTrack()
+		self.bounding = OsmGpsMap.MapTrack()
 		self.bounding.set_property("line-width", 2)
 
 		points = (
