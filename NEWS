@@ -1,11 +1,17 @@
-kismon 0.8 (2016-02-?)
+kismon 0.8 (2016-03-12)
 ===============================
 
 Changes:
 * Kismon can now connect to multiple kismet servers
+* The GPS track can be displayed on the map
 * Comment column added to the network list
 * Clipboard function added to the network list
 * Support for WPA2 (thanks to krzotr)
+* Save map position on quit (thanks to krzotr)
+
+Dependencies:
+* osm-gps-map >=1.0.2 is recommended, older versions will show a blank
+  map when you select the OpenStreetMap source
 
 kismon 0.7 (2015-06-28)
 ===============================

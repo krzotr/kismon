@@ -45,6 +45,8 @@ except SystemError:
 	from networks import Networks
 	import utils
 
+import gi
+gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 from gi.repository import GLib
 
@@ -133,7 +135,8 @@ class Core:
 				from .map import Map
 			except SystemError:
 				from map import Map
-			self.map = Map(self.config["map"])
+			user_agent = 'kismon/%s' % utils.get_version()
+			self.map = Map(self.config["map"], user_agent=user_agent)
 			self.map.set_last_from_config()
 		
 	def init_client_thread(self, server_id):
