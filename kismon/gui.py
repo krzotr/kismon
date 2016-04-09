@@ -32,7 +32,7 @@ try:
 	from .client import Client, decode_cryptset
 	from .windows import *
 	from .widgets import *
-	import kismon.utils
+	import kismon.utils as utils
 except SystemError:
 	from client import Client, decode_cryptset
 	from windows import *
@@ -104,7 +104,7 @@ class MainWindow(TemplateWindow):
 		frame.add(self.server_notebook)
 		hbox.pack_end(frame, expand=False, fill=False, padding=2)
 		
-		image = Gtk.Image.new_from_icon_name(Gtk.STOCK_ADD, Gtk.IconSize.MENU)
+		image = Gtk.Image.new_from_icon_name('list-add', Gtk.IconSize.MENU)
 		button = Gtk.Button()
 		button.props.focus_on_click = False
 		button.add(image)
@@ -318,6 +318,7 @@ class MainWindow(TemplateWindow):
 		if self.networks.queue_task:
 			self.progress_bar = Gtk.ProgressBar()
 			self.progress_bar.set_text("0.0%%, %s networks left" % len(self.networks.notify_add_queue))
+			self.progress_bar.set_show_text(True)
 			self.progress_bar.set_fraction(0)
 			
 			self.progress_bar_win = Gtk.Window()
@@ -376,7 +377,7 @@ class MainWindow(TemplateWindow):
 			label = Gtk.Label("You can't remove the last connection!")
 			area = dialog.get_content_area()
 			area.add(label)
-			dialog.add_button(Gtk.STOCK_CANCEL, 1)
+			dialog.add_button('gtk-cancel', 1)
 			dialog.show_all()
 			dialog.run()
 			dialog.destroy()
@@ -438,7 +439,7 @@ class MainWindow(TemplateWindow):
 	def on_about_dialog(self, widget):
 		dialog = Gtk.AboutDialog()
 		dialog.set_program_name("Kismon")
-		dialog.set_version("0.7")
+		dialog.set_version(utils.get_version())
 		dialog.set_comments('PyGTK based kismet client')
 		dialog.set_website('https://www.salecker.org/software/kismon.html')
 		dialog.set_copyright("(c) 2010-2015 Patrick Salecker")
@@ -483,8 +484,8 @@ class MainWindow(TemplateWindow):
 	def on_file_export(self, widget, export_format, extension, amount):
 		dialog = Gtk.FileChooserDialog(title="Export as %s" % (export_format),
 			parent=self.gtkwin, action=Gtk.FileChooserAction.SAVE)
-		dialog.add_button(Gtk.STOCK_SAVE, Gtk.ResponseType.OK)
-		dialog.add_button(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL)
+		dialog.add_button('gtk-save', Gtk.ResponseType.OK)
+		dialog.add_button('gtk-cancel', Gtk.ResponseType.CANCEL)
 		dialog.set_do_overwrite_confirmation(True)
 		dialog.set_current_name("kismon.%s" % extension)
 		

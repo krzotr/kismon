@@ -27,9 +27,12 @@ CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
+import gi
+gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 from gi.repository import Gdk, GdkPixbuf
 from gi.repository import GObject
+gi.require_version('OsmGpsMap', '1.0')
 from gi.repository import OsmGpsMap
 import cairo
 import io
@@ -38,7 +41,7 @@ import os
 import hashlib
 
 class Map:
-	def __init__(self, config):
+	def __init__(self, config, user_agent=None):
 		self.config = config
 		self.generator_is_running = False
 		self.toggle_moving_button = None
@@ -46,6 +49,8 @@ class Map:
 		self.networks_label_count = 0
 		self.coordinates = {}
 		self.tracks = {}
+		self.user_agent = user_agent
+
 		self.bounding = {}
 		
 		self.init_osm()
@@ -82,6 +87,12 @@ class Map:
 		self.osm.set_keyboard_shortcut(OsmGpsMap.MapKey_t.ZOOMIN, Gdk.keyval_from_name("Page_Up"))
 		self.osm.set_keyboard_shortcut(OsmGpsMap.MapKey_t.ZOOMOUT, Gdk.keyval_from_name("Page_Down"))
 		self.osm.connect('changed', self.on_changed)
+		
+		try:
+			self.osm.set_property('user-agent', self.user_agent)
+		except TypeError:
+			# osm-gps-map <= 1.1.0
+			pass
 		
 		self.coordinates = {}
 		for mac in list(self.markers.keys()):
@@ -131,12 +142,13 @@ class Map:
 
 		self.osm.track_add(self.bounding)
 
-	def create_dot(self, name, color=None, size=12, number=None):
+	def create_dot(self, name, color=None, size=16, number=None):
 		if color is None:
 			color = name
 		drawable = cairo.ImageSurface(cairo.FORMAT_RGB24, size, size)
 		ctx = cairo.Context(drawable)
 		ctx.set_source_rgba(1, 1, 1, 1)
+		ctx.set_antialias(True)
 		ctx.rectangle(0, 0, size, size)
 		ctx.fill()
 		ctx.stroke()

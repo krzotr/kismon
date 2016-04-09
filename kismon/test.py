@@ -322,7 +322,7 @@ class TestKismon(unittest.TestCase):
 		test_config = Config(None).default_config
 		test_map = Map(test_config["map"])
 		test_networks =  networks()
-		test_client_threads = {0: ClientThread(), 1: ClientThread()}
+		test_client_threads = {0: ClientThread()}
 		main_window = MainWindow(test_config, dummy, dummy, test_map, test_networks, {0: None, 1: None}, test_client_threads)
 		main_window.network_list.crypt_cache = {}
 		
@@ -500,7 +500,7 @@ class TestKismon(unittest.TestCase):
 		test_map.zoom_in()
 		test_map.on_map_pressed(None, None)
 		test_map.change_source("openstreetmap")
-		test_map.change_source("openstreetmap-renderer")
+		test_map.change_source("opencyclemap")
 		test_map.remove_marker("333")
 		
 		test_map.add_track(52.513, 13.323,'server1', color=(0,16621,19455))
