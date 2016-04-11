@@ -128,6 +128,12 @@ class Map:
 			ctx.set_source_rgb(1, 0.5, 0)
 		elif color == "yellow":
 			ctx.set_source_rgb(1, 1, 0)
+		elif color == "pink":
+			ctx.set_source_rgb(1, 0, 1)
+		elif color == "cyan":
+			ctx.set_source_rgb(0, 1, 1)
+		elif color == "purple":
+			ctx.set_source_rgb(0.5, 0, 1)
 		elif color == "gray":
 			num = 1/255*190
 			ctx.set_source_rgb(num, num, num)
@@ -172,6 +178,9 @@ class Map:
 		self.create_dot("orange")
 		self.create_dot("yellow")
 		self.create_dot("green")
+		self.create_dot("cyan")
+		self.create_dot("pink")
+		self.create_dot("purple")
 		self.create_dot("crosshair", color='black', size=32)
 		for number in range(1,9):
 			self.create_dot("server%s" % number, color='gray', number=number, size=24)

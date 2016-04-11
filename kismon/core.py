@@ -304,8 +304,14 @@ class Core:
 		except KeyError:
 			crypt = decode_cryptset(network["cryptset"], True)
 			self.crypt_cache[network["cryptset"]] = crypt
-		
-		if "AES_CCM" in crypt or "AES_OCB" in crypt:
+
+		if network["type"] == "ad-hoc":
+			color = "pink"
+		elif network["type"] == "data":
+			color = "purple"
+		elif network["type"] == "probe":
+			color = "cyan"
+		elif "AES_CCM" in crypt or "AES_OCB" in crypt:
 			color = "red"
 		elif "WPA" in crypt:
 			color = "orange"
